@@ -1,0 +1,14 @@
+spring:
+  devtools:
+    restart:
+      enabled: false
+  application:
+    name: dynamo-microservice
+  cloud:
+    aws:
+      dynamodb:
+        region: ${AWS_SECRET_ACCESS_KEY_LOCATION}
+        enabled: true
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
