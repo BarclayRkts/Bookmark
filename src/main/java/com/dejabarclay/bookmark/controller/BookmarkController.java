@@ -8,12 +8,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("bookmark")
 public class BookmarkController {
 
     @Autowired
     private BookmarkService bookmarkService;
+
+    //get all bookmarks by user
+    @GetMapping("/all/{userId}")
+    public ResponseEntity<List<BookmarkDTO>> getAllBookmarks(@PathVariable("userId") String userId) {
+        // We only need the PK (userId) to find all associated items
+        List<BookmarkDTO> bookmarks = bookmarkService.getAllBookmarksByUserId(userId);
+
+        if (bookmarks.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(bookmarks);
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookmarkDTO> getBookmarkById(@PathVariable("id") String id) {

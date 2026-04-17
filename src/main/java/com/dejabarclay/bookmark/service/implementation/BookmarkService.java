@@ -3,11 +3,19 @@ package com.dejabarclay.bookmark.service.implementation;
 import com.dejabarclay.bookmark.dto.BookmarkDTO;
 import com.dejabarclay.bookmark.entity.BookmarkEntity;
 import com.dejabarclay.bookmark.mapper.BookmarkMapper;
+import com.dejabarclay.bookmark.model.Bookmark;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookmarkService {
@@ -15,6 +23,25 @@ public class BookmarkService {
 
     public BookmarkService(DynamoDbTable<BookmarkEntity> bookmarkTable) {
         this.bookmarkTable = bookmarkTable;
+    }
+
+    public List<BookmarkDTO> getAllBookmarksByUserId(String username) {
+        QueryConditional queryConditional = QueryConditional
+                .keyEqualTo(Key.builder()
+                        .partitionValue("USER#" + username)
+                        .build());
+
+        System.out.println("USER#" + username);
+        System.out.println(queryConditional);
+        // 2. Query the table
+        PageIterable<BookmarkEntity> results = bookmarkTable.query(queryConditional);
+        System.out.println(results);
+
+        // 3. Flatten and map to a List
+        return results.items()
+                .stream()
+                .map(BookmarkMapper::toDTO)
+                .collect(Collectors.toList()); // This returns a List<BookmarkDTO>
     }
 
     public BookmarkDTO getBookmarkById(String id, String username) {
