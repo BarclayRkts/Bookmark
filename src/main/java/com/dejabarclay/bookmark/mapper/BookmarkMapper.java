@@ -14,8 +14,8 @@ public class BookmarkMapper {
         return new BookmarkDTO(
                 username,
                 bookmarkId,
-                entity.getUrl(),   // Map Entity URL to DTO URL
-                entity.getTitle(), // Map Entity Title to DTO Title
+                entity.getUrl(),
+                entity.getTitle(),
                 entity.getDescription(),
                 entity.getIconUrl(),
                 entity.getTags(),
