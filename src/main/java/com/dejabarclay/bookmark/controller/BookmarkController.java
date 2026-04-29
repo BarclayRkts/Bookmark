@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RequestMapping("bookmark")
 public class BookmarkController {
 
@@ -49,6 +49,24 @@ public class BookmarkController {
 
         BookmarkDTO savedBookmark = bookmarkService.createBookmark(bookmarkDto);
         return new ResponseEntity<>(savedBookmark, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<BookmarkDTO> updateBookmark(
+            @PathVariable String id,
+            @RequestBody BookmarkDTO bookmarkDto
+    ) {
+        BookmarkDTO updatedBookmark = bookmarkService.updateBookmark(id, bookmarkDto);
+        return new ResponseEntity<>(updatedBookmark, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteBookmark(
+            @PathVariable String id,
+            @RequestParam String username
+    ) {
+        bookmarkService.deleteBookmark(id, username);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     // Get all tags in the database and show on apply tags options

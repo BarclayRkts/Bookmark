@@ -33,7 +33,7 @@ public class BookmarkService {
         return results.items()
                 .stream()
                 .map(BookmarkMapper::toDTO)
-                .collect(Collectors.toList()); // This returns a List<BookmarkDTO>
+                .collect(Collectors.toList());
     }
 
     public BookmarkDTO getBookmarkById(String id, String username) {
@@ -60,4 +60,44 @@ public class BookmarkService {
 
         return BookmarkMapper.toDTO(entity);
     }
+
+    public BookmarkDTO updateBookmark(String id, BookmarkDTO bookmarkDto) {
+
+        Key key = Key.builder()
+                .partitionValue("USER#" + bookmarkDto.getUsername())
+                .sortValue("BOOKMARK#" + id)
+                .build();
+
+        BookmarkEntity existingEntity = bookmarkTable.getItem(key);
+
+        if (existingEntity == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Cannot update: Bookmark not found with ID: " + id);
+        }
+
+        BookmarkEntity entityToUpdate = BookmarkMapper.toEntity(bookmarkDto);
+
+        entityToUpdate.setPk("USER#" + bookmarkDto.getUsername());
+        entityToUpdate.setSk("BOOKMARK#" + id);
+
+        bookmarkTable.putItem(entityToUpdate);
+
+        return BookmarkMapper.toDTO(entityToUpdate);
+    }
+
+    public void deleteBookmark(String id, String username) {
+
+        Key key = Key.builder()
+                .partitionValue("USER#" + username)
+                .sortValue("BOOKMARK#" + id)
+                .build();
+
+        BookmarkEntity existing = bookmarkTable.getItem(key);
+        if (existing == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bookmark not found");
+        }
+
+        bookmarkTable.deleteItem(key);
+    }
+
 }
