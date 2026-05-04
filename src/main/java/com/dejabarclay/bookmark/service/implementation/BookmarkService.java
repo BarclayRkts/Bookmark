@@ -162,5 +162,18 @@ public class BookmarkService {
             throw new RuntimeException("Bookmark not found");
         }
     }
+    public void togglePin(String id, String username) {
+        Key key = Key.builder()
+                .partitionValue("USER#" + username)
+                .sortValue("BOOKMARK#" + id)
+                .build();
+
+        BookmarkEntity entity = bookmarkTable.getItem(key);
+
+        if (entity != null) {
+            entity.setIsPinned(!entity.getIsPinned());
+            bookmarkTable.putItem(entity);
+        }
+    }
 
 }

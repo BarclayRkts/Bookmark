@@ -97,6 +97,14 @@ public class BookmarkController {
         }
     }
 
+    @PatchMapping("/pin/{id}")
+    public ResponseEntity<Void> togglePin(
+            @PathVariable String id,
+            @RequestParam String username) {
+        bookmarkService.togglePin(id, username);
+        return ResponseEntity.ok().build();
+    }
+
 }
 
 

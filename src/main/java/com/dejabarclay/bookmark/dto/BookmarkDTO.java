@@ -35,5 +35,8 @@ public class BookmarkDTO implements Serializable {
     @Getter
     @Setter
     String createdAt;
+    @Getter
+    @Setter
+    Boolean isPinned;
 
 }

@@ -20,7 +20,8 @@ public class BookmarkMapper {
                 entity.getIconUrl(),
                 entity.getTags(),
                 entity.getIsArchived() != null ? entity.getIsArchived() : false,
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getIsPinned()
         );
     }
 
@@ -37,6 +38,7 @@ public class BookmarkMapper {
         entity.setTags(dto.getTags());
         entity.setIsArchived(dto.getIsArchived());
         entity.setCreatedAt(OffsetDateTime.now().toString());
+        entity.setIsPinned(dto.getIsPinned());
 
         return entity;
     }

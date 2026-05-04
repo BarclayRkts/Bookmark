@@ -24,6 +24,7 @@ public class BookmarkEntity {
     private List<String> tags;
     private Boolean isArchived;
     private String createdAt;
+    private Boolean isPinned;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("pk") // Matches the 'pk' column in AWS
