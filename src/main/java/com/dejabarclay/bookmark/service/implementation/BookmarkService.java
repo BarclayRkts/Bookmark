@@ -7,11 +7,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,6 +104,46 @@ public class BookmarkService {
         }
 
         bookmarkTable.deleteItem(key);
+    }
+
+    public List<BookmarkDTO> searchBookmarks(String query, String username) {
+        QueryConditional queryConditional = QueryConditional
+                .keyEqualTo(Key.builder()
+                        .partitionValue("USER#" + username)
+                        .build());
+
+        Map<String, String> expressionAttributeNames = new HashMap<>();
+        expressionAttributeNames.put("#u", "url");
+
+        Expression filterExpression = Expression.builder()
+                .expression("contains(title, :q) OR contains(description, :q) OR contains(tags, :q) OR contains(#u, :q)")
+                .expressionNames(expressionAttributeNames)
+                .putExpressionValue(":q", AttributeValue.builder().s(query).build())
+                .build();
+
+        QueryEnhancedRequest request = QueryEnhancedRequest.builder()
+                .queryConditional(queryConditional)
+                .filterExpression(filterExpression)
+                .build();
+
+        return bookmarkTable.query(request).items().stream()
+                .map(BookmarkMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getAllUniqueTags(String username) {
+        QueryConditional queryConditional = QueryConditional
+                .keyEqualTo(Key.builder()
+                        .partitionValue("USER#" + username)
+                        .build());
+
+        return bookmarkTable.query(queryConditional).items().stream()
+                .map(BookmarkEntity::getTags)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
 }

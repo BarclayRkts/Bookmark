@@ -69,6 +69,20 @@ public class BookmarkController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<BookmarkDTO>> searchBookmarks(
+            @RequestParam String query,
+            @RequestParam String username) {
+        List<BookmarkDTO> results = bookmarkService.searchBookmarks(query, username);
+        return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("/tags/{username}")
+    public ResponseEntity<List<String>> getUniqueTags(@PathVariable String username) {
+        List<String> tags = bookmarkService.getAllUniqueTags(username);
+        return ResponseEntity.ok(tags);
+    }
+
     // Get all tags in the database and show on apply tags options
 }
 
