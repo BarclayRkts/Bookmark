@@ -41,7 +41,6 @@ public class DynamoDBConfig {
 
     @Bean
     public DynamoDbTable<BookmarkEntity> bookmarkTable(DynamoDbEnhancedClient enhancedClient) {
-        // Change "employeedetails" to your new table name "bookmarks"
         return enhancedClient.table("bookmarks", TableSchema.fromBean(BookmarkEntity.class));
     }
 }

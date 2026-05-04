@@ -84,9 +84,7 @@ public class BookmarkController {
     }
 
     @PatchMapping("/archive/{bookmarkId}")
-    public ResponseEntity<String> archiveBookmark(
-            @PathVariable String bookmarkId,
-            @RequestParam String username) {
+    public ResponseEntity<String> archiveBookmark(@PathVariable String bookmarkId, @RequestParam String username) {
 
         try {
             bookmarkService.archiveBookmark(bookmarkId, username);
@@ -98,10 +96,14 @@ public class BookmarkController {
     }
 
     @PatchMapping("/pin/{id}")
-    public ResponseEntity<Void> togglePin(
-            @PathVariable String id,
-            @RequestParam String username) {
+    public ResponseEntity<Void> togglePin(@PathVariable String id, @RequestParam String username) {
         bookmarkService.togglePin(id, username);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/increment-views/{id}")
+    public ResponseEntity<Void> incrementViews(@PathVariable String id, @RequestParam String username) {
+        bookmarkService.incrementViewCount(id, username);
         return ResponseEntity.ok().build();
     }
 

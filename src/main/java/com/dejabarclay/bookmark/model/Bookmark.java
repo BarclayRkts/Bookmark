@@ -40,5 +40,11 @@ public class Bookmark {
     @Setter
     @Getter
     private String createdAt;
+    @Setter
+    @Getter
+    private Boolean isPinned;
+    @Setter
+    @Getter
+    private Integer views;
 
 }

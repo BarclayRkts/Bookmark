@@ -176,4 +176,20 @@ public class BookmarkService {
         }
     }
 
+    public void incrementViewCount(String id, String username) {
+        Key key = Key.builder()
+                .partitionValue("USER#" + username)
+                .sortValue("BOOKMARK#" + id)
+                .build();
+
+        BookmarkEntity entity = bookmarkTable.getItem(key);
+
+        if (entity != null) {
+            int currentViews = entity.getViews() != null ? entity.getViews() : 0;
+            entity.setViews(currentViews + 1);
+
+            bookmarkTable.putItem(entity);
+        }
+    }
+
 }
