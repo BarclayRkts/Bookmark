@@ -11,7 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
 @RequestMapping("bookmark")
 public class BookmarkController {
 
@@ -83,7 +83,20 @@ public class BookmarkController {
         return ResponseEntity.ok(tags);
     }
 
-    // Get all tags in the database and show on apply tags options
+    @PatchMapping("/archive/{bookmarkId}")
+    public ResponseEntity<String> archiveBookmark(
+            @PathVariable String bookmarkId,
+            @RequestParam String username) {
+
+        try {
+            bookmarkService.archiveBookmark(bookmarkId, username);
+            return ResponseEntity.ok("Bookmark archived successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error archiving bookmark: " + e.getMessage());
+        }
+    }
+
 }
 
 

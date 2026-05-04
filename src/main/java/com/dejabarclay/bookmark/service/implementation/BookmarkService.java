@@ -146,4 +146,21 @@ public class BookmarkService {
                 .collect(Collectors.toList());
     }
 
+    public void archiveBookmark(String bookmarkId, String username) {
+        Key key = Key.builder()
+                .partitionValue("USER#" + username)
+                .sortValue("BOOKMARK#" + bookmarkId)
+                .build();
+
+        BookmarkEntity existingBookmark = bookmarkTable.getItem(key);
+
+        if (existingBookmark != null) {
+            existingBookmark.setIsArchived(!existingBookmark.getIsArchived());
+
+            bookmarkTable.putItem(existingBookmark);
+        } else {
+            throw new RuntimeException("Bookmark not found");
+        }
+    }
+
 }
