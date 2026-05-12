@@ -11,8 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
-@RequestMapping("bookmark")
+@CrossOrigin(origins = {"http://localhost:3000", "https://vercel.app"}, methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
+@RequestMapping("/bookmark")
 public class BookmarkController {
 
     @Autowired
