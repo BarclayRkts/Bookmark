@@ -1,65 +1,134 @@
-import Image from "next/image";
+"use client"
+
+import * as React from "react"
+import {SidebarProvider} from "@/components/ui/sidebar"
+import {AppSidebar} from "@/app/sidebar/AppSidebar";
+import {Header} from "@/app/header/Header";
+import {useCallback, useEffect, useState} from "react";
+import BookmarksGrid from "@/app/bookmarks/BookmarksGrid";
+import AddBookmarkModal from "@/app/bookmarks/AddBookmarkModal";
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+    const [activeTab, setActiveTab] = useState("home");
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [open, setOpen] = React.useState(false);
+    const [bookmarks, setBookmarks] = useState<any[]>([]);
+    const [selectedBookmark, setSelectedBookmark] = useState(null);
+    const currentUsername = "dejabarclay";
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const [loading, setLoading] = useState(true);
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+    const handleEditClick = (bookmark: any) => {
+        setSelectedBookmark(bookmark);
+        setOpen(true);
+    };
+
+    const handleAddClick = () => {
+        setSelectedBookmark(null);
+        setOpen(true);
+    };
+
+    const baseBookmarks = bookmarks.filter((b) => {
+        if (activeTab === "home") return !b.isArchived;
+        if (activeTab === "archived") return b.isArchived;
+        return true;
+    });
+
+    const allBookmarks = baseBookmarks
+        .filter((bookmark) => {
+            if (selectedTags.length === 0) return true;
+            return bookmark.tags?.some((tag: string) => selectedTags.includes(tag));
+        })
+        .sort((a, b) => {
+            if (a.isPinned === b.isPinned) return 0;
+            return a.isPinned ? -1 : 1;
+        });
+
+    const handleSearch = useCallback(async (query: string) => {
+        try {
+            const url = query
+                ? `${BASE_URL}/bookmark/search?query=${query}&username=${currentUsername}`
+                : `${BASE_URL}/bookmark/all/${currentUsername}`;
+
+            const response = await fetch(url);
+            const data = await response.json();
+            console.log("data: ", data);
+            setBookmarks(data);
+        } catch (error) {
+            console.error("Search failed:", error);
+        }
+    }, [currentUsername]);
+
+    useEffect(() => {
+        const fetchBookmarks = async () => {
+            try {
+                const userId = "dejabarclay";
+                const response = await fetch(`${BASE_URL}/bookmark/all/${userId}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setBookmarks(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch bookmarks:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        void fetchBookmarks();
+    }, [refreshKey]);
+
+    useEffect(() => {
+        const fetchTags = async () => {
+            const response = await fetch(`${BASE_URL}/bookmark/tags/${currentUsername}`);
+            if (response.ok) {
+                const data = await response.json();
+                setAvailableTags(data);
+            }
+        };
+        fetchTags();
+    }, [currentUsername]);
+
+    const handleTagToggle = (tag: string) => {
+        setSelectedTags((prev) =>
+            prev.includes(tag)
+                ? prev.filter((t) => t !== tag)
+                : [...prev, tag]
+        );
+    };
+
+    return (
+        <SidebarProvider>
+            <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} selectedTags={selectedTags}
+                        onTagToggle={handleTagToggle} availableTags={availableTags}/>
+            <div className="flex flex-1 flex-col">
+                <Header handleAddClick={handleAddClick} handleSearch={handleSearch}/>
+                <main className="flex-1 p-6">
+                    <h1 className="text-2xl font-bold mb-6">
+                        {activeTab === "home" ?
+                            <BookmarksGrid
+                                refreshKey={refreshKey}
+                                setOpen={setOpen}
+                                onEdit={handleEditClick}
+                                setRefreshKey={setRefreshKey}
+                                bookmarks={allBookmarks}
+                                loading={loading}
+                            />
+                            : <BookmarksGrid
+                                refreshKey={refreshKey}
+                                setOpen={setOpen}
+                                onEdit={handleEditClick}
+                                setRefreshKey={setRefreshKey}
+                                bookmarks={allBookmarks}
+                                loading={loading}
+                            />}
+                    </h1>
+                </main>
+                <AddBookmarkModal open={open} setOpen={setOpen} setRefreshKey={setRefreshKey} initialData={selectedBookmark}/>
+            </div>
+        </SidebarProvider>
+    )
 }
