@@ -1,12 +1,18 @@
-# Step 1: Use a Java runtime as the base
-FROM eclipse-temurin:17-jdk-alpine
-
-# Step 2: Create a directory for the app
+# --- Stage 1: Build the application ---
+FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
+# Copy the pom.xml and source code
+COPY pom.xml .
+COPY src ./src
+# Build the project and skip tests to save time
+RUN mvn clean package -DskipTests
 
-# Step 3: Copy your compiled .jar file into the container
-# Note: Run './mvnw package' first to generate this file in the /target folder
-COPY target/*.jar app.jar
-
-# Step 4: Tell Docker to run the app
+# --- Stage 2: Run the application ---
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+# Copy ONLY the finished .jar from the build stage
+COPY --from=build /app/target/*.jar app.jar
+# Expose the port
+EXPOSE 8080
+# Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]
