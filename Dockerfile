@@ -1,5 +1,5 @@
 # --- Stage 1: Build the application ---
-FROM maven:3.8.5-openjdk-17 AS build
+FROM maven:3.8.5-openjdk-21 AS build
 WORKDIR /app
 # Copy the pom.xml and source code
 COPY pom.xml .
@@ -8,7 +8,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # --- Stage 2: Run the application ---
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine
 WORKDIR /app
 # Copy ONLY the finished .jar from the build stage
 COPY --from=build /app/target/*.jar app.jar
