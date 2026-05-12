@@ -60,8 +60,6 @@ The backend provides a comprehensive RESTful API for bookmark management:
 
 ## 📂 Project Structure
 
-As illustrated in **image_8f4779.png**, the project is organized into a clear monorepo-style structure separating the frontend and backend logic:
-
 ```text
 Bookmark/
 ├── frontend/                # Next.js frontend application
